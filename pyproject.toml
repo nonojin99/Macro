@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "macro-studio"
+version = "1.0.0"
+description = "Korean UI desktop Macro Recorder & Editor (mouse + keyboard)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Macro Studio" }]
+dependencies = [
+  "pynput==1.8.2",
+  "customtkinter==5.2.2",
+]
+
+[project.scripts]
+macro-studio = "macro_studio.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["macro_studio*"]
