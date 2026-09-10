@@ -1,1 +1,1 @@
-PLACEHOLDER_LOAD_FROM_FILE
+__LOAD__/workspace/Macro/macro_studio/app.py
