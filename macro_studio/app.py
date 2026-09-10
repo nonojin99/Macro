@@ -1,3 +1,338 @@
-# Auto-expanded Macro Studio app (exact source via zlib).
-import zlib, base64
-exec(compile(zlib.decompress(base64.b64decode('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')), __file__, "exec"), globals())
+"""Macro Studio — customtkinter 한국어 UI 셸."""
+
+from __future__ import annotations
+
+from tkinter import messagebox
+
+import customtkinter as ctk
+from pynput import keyboard
+
+from .models import MacroDocument, MacroEvent
+from .player import MacroPlayer
+from .recorder import MacroRecorder
+from . import storage
+from .ui_events import EventsUIMixin
+from .ui_slots import SlotsUIMixin
+
+APP_TITLE = "매크로 스튜디오 (Macro Studio)"
+
+
+class MacroStudioApp(SlotsUIMixin, EventsUIMixin, ctk.CTk):
+    def __init__(self) -> None:
+        super().__init__()
+        ctk.set_appearance_mode("System")
+        ctk.set_default_color_theme("blue")
+
+        self.title(APP_TITLE)
+        self.geometry("1180x760")
+        self.minsize(960, 640)
+
+        self._current_slot: int = 1
+        self._doc = MacroDocument.empty_for_slot(1)
+        self._dirty = False
+        self._selected_index: int | None = None
+        self._ctrl_held = False
+
+        self._recorder = MacroRecorder(
+            record_mouse_move=False,
+            on_event=self._on_record_event,
+            on_state_change=self._on_record_state,
+        )
+        self._player = MacroPlayer(
+            countdown_seconds=3,
+            on_countdown=self._on_countdown,
+            on_progress=self._on_play_progress,
+            on_finished=self._on_play_finished,
+            on_state_change=self._on_play_state,
+        )
+
+        self._hotkey_listener: keyboard.Listener | None = None
+        self._build_ui()
+        self._refresh_slot_list(select=1)
+        self._load_slot_into_editor(1, confirm_dirty=False)
+        self._start_global_hotkeys()
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+    def _build_ui(self) -> None:
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        left = ctk.CTkFrame(self, width=260)
+        left.grid(row=0, column=0, sticky="nsew", padx=(12, 6), pady=12)
+        self._build_left_slot_panel(left)
+
+        right = ctk.CTkFrame(self)
+        right.grid(row=0, column=1, sticky="nsew", padx=(6, 12), pady=12)
+        right.grid_columnconfigure(0, weight=1)
+        right.grid_rowconfigure(3, weight=1)
+
+        meta = ctk.CTkFrame(right)
+        meta.grid(row=0, column=0, sticky="ew", padx=8, pady=(8, 4))
+        meta.grid_columnconfigure(1, weight=1)
+
+        self.slot_badge = ctk.CTkLabel(
+            meta,
+            text="현재 슬롯: 1번",
+            font=ctk.CTkFont(size=14, weight="bold"),
+        )
+        self.slot_badge.grid(row=0, column=0, columnspan=2, padx=8, pady=(6, 2), sticky="w")
+
+        ctk.CTkLabel(meta, text="이름").grid(row=1, column=0, padx=8, pady=6, sticky="w")
+        self.name_entry = ctk.CTkEntry(meta, placeholder_text="매크로 이름")
+        self.name_entry.grid(row=1, column=1, padx=8, pady=6, sticky="ew")
+        self.name_entry.insert(0, self._doc.name)
+
+        ctk.CTkLabel(meta, text="설명").grid(row=2, column=0, padx=8, pady=6, sticky="w")
+        self.desc_entry = ctk.CTkEntry(meta, placeholder_text="설명 (선택)")
+        self.desc_entry.grid(row=2, column=1, padx=8, pady=6, sticky="ew")
+
+        self.status_label = ctk.CTkLabel(
+            meta,
+            text="대기 중 — F9 녹화 토글 / F10 재생 / Ctrl+1~0 슬롯",
+            font=ctk.CTkFont(size=13, weight="bold"),
+        )
+        self.status_label.grid(row=3, column=0, columnspan=2, padx=8, pady=(4, 8), sticky="w")
+
+        self.rec_indicator = ctk.CTkLabel(
+            meta,
+            text="",
+            text_color="#e33",
+            font=ctk.CTkFont(size=14, weight="bold"),
+        )
+        self.rec_indicator.grid(row=4, column=0, columnspan=2, padx=8, pady=(0, 8), sticky="w")
+
+        controls = ctk.CTkFrame(right)
+        controls.grid(row=1, column=0, sticky="ew", padx=8, pady=4)
+        for i in range(7):
+            controls.grid_columnconfigure(i, weight=1)
+
+        self.btn_record = ctk.CTkButton(
+            controls, text="● 녹화 시작 (F9)", command=self._toggle_record, fg_color="#c33", hover_color="#a22"
+        )
+        self.btn_record.grid(row=0, column=0, padx=4, pady=8, sticky="ew")
+
+        self.btn_play = ctk.CTkButton(controls, text="▶ 재생 (F10)", command=self._play)
+        self.btn_play.grid(row=0, column=1, padx=4, pady=8, sticky="ew")
+
+        self.btn_abort = ctk.CTkButton(
+            controls, text="■ 중단 (Esc)", command=self._abort_play, fg_color="#555", hover_color="#444"
+        )
+        self.btn_abort.grid(row=0, column=2, padx=4, pady=8, sticky="ew")
+
+        self.btn_save = ctk.CTkButton(controls, text="💾 슬롯 저장", command=self._save)
+        self.btn_save.grid(row=0, column=3, padx=4, pady=8, sticky="ew")
+
+        self.btn_new = ctk.CTkButton(
+            controls, text="슬롯 초기화", command=self._new_macro, fg_color="#555", hover_color="#444"
+        )
+        self.btn_new.grid(row=0, column=4, padx=4, pady=8, sticky="ew")
+
+        self.move_var = ctk.BooleanVar(value=False)
+        self.move_check = ctk.CTkCheckBox(
+            controls,
+            text="마우스 이동 녹화",
+            variable=self.move_var,
+            command=self._sync_move_option,
+        )
+        self.move_check.grid(row=0, column=5, padx=8, pady=8, sticky="w")
+
+        self._build_play_from_controls(controls)
+
+        hint = ctk.CTkLabel(
+            right,
+            text="녹화 중지 후 반드시 이벤트 목록을 편집하세요. 디스크 저장은 [슬롯 저장]을 눌렀을 때만 수행됩니다. "
+            "재생은 기본 1회(무한 루프 없음). 동작 번호는 1부터 시작합니다.",
+            font=ctk.CTkFont(size=12),
+            wraplength=860,
+            justify="left",
+        )
+        hint.grid(row=2, column=0, sticky="w", padx=12, pady=(0, 4))
+
+        editor = ctk.CTkFrame(right)
+        editor.grid(row=3, column=0, sticky="nsew", padx=8, pady=8)
+        self._build_event_editor(editor)
+
+    def _start_global_hotkeys(self) -> None:
+        def on_press(key: keyboard.Key | keyboard.KeyCode) -> None:
+            try:
+                if key in (keyboard.Key.ctrl, keyboard.Key.ctrl_l, keyboard.Key.ctrl_r):
+                    self._ctrl_held = True
+                    return
+                if key == keyboard.Key.f9:
+                    self.after(0, self._toggle_record)
+                    return
+                if key == keyboard.Key.f10:
+                    if self._player.is_playing:
+                        self.after(0, self._abort_play)
+                    else:
+                        self.after(0, self._play)
+                    return
+                if self._ctrl_held and isinstance(key, keyboard.KeyCode):
+                    slot = None
+                    ch = key.char
+                    if ch and ch in "1234567890":
+                        slot = 10 if ch == "0" else int(ch)
+                    elif getattr(key, "vk", None) is not None:
+                        vk = int(key.vk)
+                        if 49 <= vk <= 57:
+                            slot = vk - 48
+                        elif vk == 48:
+                            slot = 10
+                        elif 97 <= vk <= 105:
+                            slot = vk - 96
+                        elif vk == 96:
+                            slot = 10
+                    if slot is not None:
+                        self.after(0, lambda s=slot: self._select_slot_hotkey(s))
+            except Exception:
+                pass
+
+        def on_release(key: keyboard.Key | keyboard.KeyCode) -> None:
+            try:
+                if key in (keyboard.Key.ctrl, keyboard.Key.ctrl_l, keyboard.Key.ctrl_r):
+                    self._ctrl_held = False
+            except Exception:
+                pass
+
+        self._hotkey_listener = keyboard.Listener(on_press=on_press, on_release=on_release)
+        self._hotkey_listener.daemon = True  # type: ignore[attr-defined]
+        self._hotkey_listener.start()
+
+    def _set_status(self, text: str) -> None:
+        self.status_label.configure(text=text)
+
+    def _sync_move_option(self) -> None:
+        self._recorder.record_mouse_move = bool(self.move_var.get())
+
+    def _mark_dirty(self) -> None:
+        self._dirty = True
+
+    def _toggle_record(self) -> None:
+        if self._player.is_playing:
+            self._set_status("재생 중에는 녹화할 수 없습니다.")
+            return
+        self._sync_move_option()
+        if self._recorder.is_recording:
+            events = self._recorder.stop()
+            self._doc.events = list(events)
+            self._mark_dirty()
+            self._refresh_event_list()
+            self.rec_indicator.configure(text="")
+            self.btn_record.configure(text="● 녹화 시작 (F9)")
+            self._set_status(f"녹화 중지 — {len(events)}개 이벤트. 목록을 편집한 뒤 [슬롯 저장]하세요.")
+            messagebox.showinfo(
+                "녹화 완료",
+                f"{len(events)}개 이벤트가 기록되었습니다.\n"
+                "오른쪽 편집기에서 수정·삭제·순서 변경·대기 삽입 후\n"
+                f"[슬롯 저장]을 눌러 {self._current_slot}번 슬롯에 쓰세요.",
+            )
+        else:
+            if self._doc.events:
+                if not messagebox.askyesno("녹화 시작", "기존 이벤트 목록을 지우고 새로 녹화할까요?"):
+                    return
+            self._recorder.start()
+            self.rec_indicator.configure(text="● 녹화 중… (F9로 중지)")
+            self.btn_record.configure(text="■ 녹화 중지 (F9)")
+            self._set_status("녹화 중 — 마우스/키보드 입력이 기록됩니다.")
+
+    def _on_record_event(self, _event: MacroEvent) -> None:
+        def update() -> None:
+            n = len(self._recorder.events)
+            self.rec_indicator.configure(text=f"● 녹화 중… {n} events (F9로 중지)")
+
+        self.after(0, update)
+
+    def _on_record_state(self, recording: bool) -> None:
+        def update() -> None:
+            if recording:
+                self.rec_indicator.configure(text="● 녹화 중… (F9로 중지)")
+            else:
+                self.rec_indicator.configure(text="")
+
+        self.after(0, update)
+
+    def _play(self) -> None:
+        self._start_play(start_1based=1)
+
+    def _start_play(self, *, start_1based: int) -> None:
+        if self._recorder.is_recording:
+            self._set_status("녹화 중에는 재생할 수 없습니다.")
+            return
+        if self._player.is_playing:
+            return
+        if not self._doc.events:
+            messagebox.showwarning("재생", "재생할 이벤트가 없습니다.")
+            return
+        if start_1based < 1 or start_1based > len(self._doc.events):
+            messagebox.showwarning(
+                "재생",
+                f"시작 번호는 1~{len(self._doc.events)} 사이여야 합니다.",
+            )
+            return
+        start_idx = start_1based - 1
+        if start_1based == 1:
+            self._set_status("재생 준비 — 3초 카운트다운… (Esc/F10 중단)")
+        else:
+            self._set_status(f"{start_1based}번부터 재생 준비 — 3초 카운트다운… (Esc/F10 중단)")
+        self._player.play(self._doc.events, loop=False, start_index=start_idx)
+
+    def _abort_play(self) -> None:
+        if self._player.is_playing:
+            self._player.abort()
+            self._set_status("재생 중단 요청…")
+
+    def _on_countdown(self, remaining: int) -> None:
+        def update() -> None:
+            if remaining > 0:
+                self._set_status(f"재생 카운트다운: {remaining}… (Esc/F10 중단)")
+            else:
+                self._set_status("재생 중… (Esc/F10 중단)")
+
+        self.after(0, update)
+
+    def _on_play_progress(self, current: int, total: int) -> None:
+        def update() -> None:
+            self._set_status(f"재생 중… 동작 {current}/{total} (Esc/F10 중단)")
+
+        self.after(0, update)
+
+    def _on_play_finished(self, aborted: bool) -> None:
+        def update() -> None:
+            if aborted:
+                self._set_status("재생이 중단되었습니다.")
+            else:
+                self._set_status("재생 완료 (1회).")
+
+        self.after(0, update)
+
+    def _on_play_state(self, playing: bool) -> None:
+        def update() -> None:
+            state = "disabled" if playing else "normal"
+            try:
+                self.btn_record.configure(state=state)
+                self.btn_save.configure(state=state)
+            except Exception:
+                pass
+
+        self.after(0, update)
+
+    def _on_close(self) -> None:
+        if self._recorder.is_recording:
+            self._recorder.stop()
+        if self._player.is_playing:
+            self._player.abort()
+        if self._hotkey_listener is not None:
+            try:
+                self._hotkey_listener.stop()
+            except Exception:
+                pass
+        if self._dirty:
+            if not messagebox.askyesno("종료", "저장하지 않은 변경이 있습니다. 종료할까요?"):
+                return
+        self.destroy()
+
+
+def run_app() -> None:
+    storage.ensure_macros_dir()
+    app = MacroStudioApp()
+    app.mainloop()
