@@ -1,12 +1,11 @@
-"""이벤트 목록 · 편집 · 범위 삭제 · N번부터 재생 · 커서 XY 채우기."""
+"""이벤트 목록 · 편집 · 범위 삭제 · 잘라내기/복사/붙여넣기 · N번부터 재생 · 좌표."""
 
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 
 import customtkinter as ctk
-from pynput import mouse
 
 from .models import EventType, MacroEvent
 
@@ -20,9 +19,12 @@ EVENT_TYPES = [
 
 
 class EventsUIMixin:
-    """MacroStudioApp 에 믹스인 — 이벤트 에디터/재생-from/좌표."""
+    """MacroStudioApp 에 믹스인 — 이벤트 에디터/클립보드/재생-from/좌표."""
+
+    _event_clipboard: list[MacroEvent]
 
     def _build_event_editor(self, parent: ctk.CTkFrame) -> None:
+        self._event_clipboard = []
         parent.grid_columnconfigure(0, weight=3)
         parent.grid_columnconfigure(1, weight=2)
         parent.grid_rowconfigure(1, weight=1)
@@ -54,17 +56,24 @@ class EventsUIMixin:
         self.event_listbox.bind("<<ListboxSelect>>", self._on_event_select)
 
         range_bar = ctk.CTkFrame(list_frame, fg_color="transparent")
-        range_bar.grid(row=2, column=0, sticky="ew", padx=4, pady=(0, 8))
-        ctk.CTkLabel(range_bar, text="범위 삭제:").pack(side="left", padx=(0, 4))
+        range_bar.grid(row=2, column=0, sticky="ew", padx=4, pady=(0, 4))
+        ctk.CTkLabel(range_bar, text="범위:").pack(side="left", padx=(0, 4))
         self.range_from_var = ctk.StringVar(value="1")
         self.range_to_var = ctk.StringVar(value="1")
-        ctk.CTkEntry(range_bar, textvariable=self.range_from_var, width=44).pack(side="left", padx=2)
+        ctk.CTkEntry(range_bar, textvariable=self.range_from_var, width=40).pack(side="left", padx=1)
         ctk.CTkLabel(range_bar, text="~").pack(side="left")
-        ctk.CTkEntry(range_bar, textvariable=self.range_to_var, width=44).pack(side="left", padx=2)
-        ctk.CTkLabel(range_bar, text="번").pack(side="left", padx=(0, 6))
+        ctk.CTkEntry(range_bar, textvariable=self.range_to_var, width=40).pack(side="left", padx=1)
+        ctk.CTkLabel(range_bar, text="번").pack(side="left", padx=(0, 4))
         ctk.CTkButton(
-            range_bar, text="범위 삭제", command=self._delete_range, width=90, height=28, fg_color="#a33", hover_color="#822"
-        ).pack(side="left", padx=2)
+            range_bar, text="범위 삭제", command=self._delete_range, width=72, height=26, fg_color="#a33", hover_color="#822"
+        ).pack(side="left", padx=1)
+
+        clip_bar = ctk.CTkFrame(list_frame, fg_color="transparent")
+        clip_bar.grid(row=3, column=0, sticky="ew", padx=4, pady=(0, 8))
+        ctk.CTkButton(clip_bar, text="잘라내기", command=self._cut_range, width=72, height=26).pack(side="left", padx=1)
+        ctk.CTkButton(clip_bar, text="복사", command=self._copy_range, width=56, height=26).pack(side="left", padx=1)
+        ctk.CTkButton(clip_bar, text="붙여넣기", command=self._paste_events, width=72, height=26).pack(side="left", padx=1)
+        ctk.CTkLabel(clip_bar, text="(선택 위치 앞 / 없으면 끝)", font=ctk.CTkFont(size=11)).pack(side="left", padx=6)
 
         edit_panel = ctk.CTkFrame(parent)
         edit_panel.grid(row=1, column=1, sticky="nsew", padx=(4, 8), pady=8)
@@ -85,9 +94,10 @@ class EventsUIMixin:
             ("dx", "dx"),
             ("dy", "dy"),
             ("key", "키"),
+            ("monitor", "모니터#"),
         ]
         for row_i, (key, label) in enumerate(fields, start=1):
-            ctk.CTkLabel(edit_panel, text=label).grid(row=row_i, column=0, padx=8, pady=3, sticky="w")
+            ctk.CTkLabel(edit_panel, text=label).grid(row=row_i, column=0, padx=8, pady=2, sticky="w")
             var = ctk.StringVar(value="")
             self._edit_vars[key] = var
             if key == "type":
@@ -96,10 +106,10 @@ class EventsUIMixin:
                 )
             else:
                 entry = ctk.CTkEntry(edit_panel, textvariable=var)
-            entry.grid(row=row_i, column=1, padx=8, pady=3, sticky="ew")
+            entry.grid(row=row_i, column=1, padx=8, pady=2, sticky="ew")
 
         apply_btn = ctk.CTkButton(edit_panel, text="필드 적용", command=self._apply_edit)
-        apply_btn.grid(row=len(fields) + 1, column=0, columnspan=2, padx=8, pady=(12, 4), sticky="ew")
+        apply_btn.grid(row=len(fields) + 1, column=0, columnspan=2, padx=8, pady=(10, 4), sticky="ew")
 
         ctk.CTkButton(
             edit_panel,
@@ -190,6 +200,7 @@ class EventsUIMixin:
             "dx": "" if ev.dx is None else str(ev.dx),
             "dy": "" if ev.dy is None else str(ev.dy),
             "key": ev.key or "",
+            "monitor": "" if ev.monitor is None else str(ev.monitor),
         }
         for k, v in mapping.items():
             self._edit_vars[k].set(v)
@@ -199,125 +210,3 @@ class EventsUIMixin:
         if raw == "":
             return None
         return int(raw)
-
-    def _apply_edit(self) -> None:
-        if self._selected_index is None:
-            messagebox.showinfo("편집", "이벤트를 먼저 선택하세요.")
-            return
-        idx = self._selected_index
-        try:
-            delay = int(self._edit_vars["delay_ms"].get().strip() or "0")
-            ev = MacroEvent(
-                type=self._edit_vars["type"].get().strip() or EventType.WAIT.value,
-                delay_ms=max(0, delay),
-                x=self._optional_int(self._edit_vars["x"].get()),
-                y=self._optional_int(self._edit_vars["y"].get()),
-                button=(self._edit_vars["button"].get().strip() or None),
-                action=(self._edit_vars["action"].get().strip() or None),
-                dx=self._optional_int(self._edit_vars["dx"].get()),
-                dy=self._optional_int(self._edit_vars["dy"].get()),
-                key=(self._edit_vars["key"].get().strip() or None),
-            )
-        except ValueError:
-            messagebox.showerror("편집", "숫자 필드 형식이 올바르지 않습니다.")
-            return
-        self._doc.events[idx] = ev
-        self._mark_dirty()
-        self._refresh_event_list(select=idx)
-        self._set_status(f"동작 {idx + 1} 수정됨 (아직 디스크 미저장).")
-
-    def _fill_xy_from_cursor(self) -> None:
-        """현재 커서 좌표를 선택 이벤트(및 X/Y 필드)에 채운다."""
-        if self._selected_index is None:
-            messagebox.showinfo("좌표", "이벤트를 먼저 선택하세요.")
-            return
-        try:
-            ctrl = mouse.Controller()
-            x, y = ctrl.position
-            x_i, y_i = int(x), int(y)
-        except Exception as e:
-            messagebox.showerror("좌표", f"마우스 위치를 읽을 수 없습니다: {e}")
-            return
-        self._edit_vars["x"].set(str(x_i))
-        self._edit_vars["y"].set(str(y_i))
-        idx = self._selected_index
-        ev = self._doc.events[idx]
-        if ev.type not in (
-            EventType.CLICK.value,
-            EventType.MOVE.value,
-            EventType.SCROLL.value,
-        ):
-            self._set_status(f"커서 ({x_i}, {y_i}) — 필드에 채움. [필드 적용]을 누르세요.")
-            messagebox.showinfo(
-                "좌표",
-                f"현재 마우스 위치 ({x_i}, {y_i}) 를 X/Y 필드에 넣었습니다.\n"
-                f"선택 이벤트 유형은 '{ev.type}' 입니다. [필드 적용]으로 반영하세요.",
-            )
-            return
-        ev.x = x_i
-        ev.y = y_i
-        self._mark_dirty()
-        self._refresh_event_list(select=idx)
-        self._set_status(f"동작 {idx + 1} 좌표 → ({x_i}, {y_i}) (아직 디스크 미저장).")
-
-    def _delete_event(self) -> None:
-        if self._selected_index is None:
-            return
-        idx = self._selected_index
-        del self._doc.events[idx]
-        self._mark_dirty()
-        new_sel = min(idx, len(self._doc.events) - 1) if self._doc.events else None
-        self._refresh_event_list(select=new_sel)
-        self._set_status("이벤트 삭제됨 (아직 디스크 미저장).")
-
-    def _delete_range(self) -> None:
-        """1-based 포함 범위 A~B 삭제. 이후 동작이 앞으로 당겨짐."""
-        if not self._doc.events:
-            messagebox.showinfo("범위 삭제", "삭제할 이벤트가 없습니다.")
-            return
-        try:
-            a = int(self.range_from_var.get().strip())
-            b = int(self.range_to_var.get().strip())
-        except ValueError:
-            messagebox.showerror("범위 삭제", "시작/끝 번호가 올바르지 않습니다.")
-            return
-        if a > b:
-            a, b = b, a
-        n = len(self._doc.events)
-        if a < 1 or b > n:
-            messagebox.showwarning("범위 삭제", f"범위는 1~{n} 사이여야 합니다.")
-            return
-        if not messagebox.askyesno("범위 삭제", f"동작 {a}~{b} 를 삭제할까요? ({b - a + 1}개)"):
-            return
-        del self._doc.events[a - 1 : b]
-        self._mark_dirty()
-        new_sel = min(a - 1, len(self._doc.events) - 1) if self._doc.events else None
-        self._refresh_event_list(select=new_sel)
-        self._set_status(f"동작 {a}~{b} 삭제됨 (아직 디스크 미저장).")
-
-    def _move_up(self) -> None:
-        if self._selected_index is None or self._selected_index <= 0:
-            return
-        i = self._selected_index
-        self._doc.events[i - 1], self._doc.events[i] = self._doc.events[i], self._doc.events[i - 1]
-        self._mark_dirty()
-        self._refresh_event_list(select=i - 1)
-
-    def _move_down(self) -> None:
-        if self._selected_index is None or self._selected_index >= len(self._doc.events) - 1:
-            return
-        i = self._selected_index
-        self._doc.events[i + 1], self._doc.events[i] = self._doc.events[i], self._doc.events[i + 1]
-        self._mark_dirty()
-        self._refresh_event_list(select=i + 1)
-
-    def _insert_wait(self) -> None:
-        ms = simpledialog.askinteger("대기 삽입", "대기 시간 (ms):", minvalue=0, initialvalue=500, parent=self)
-        if ms is None:
-            return
-        insert_at = (self._selected_index + 1) if self._selected_index is not None else len(self._doc.events)
-        ev = MacroEvent(type=EventType.WAIT.value, delay_ms=int(ms))
-        self._doc.events.insert(insert_at, ev)
-        self._mark_dirty()
-        self._refresh_event_list(select=insert_at)
-        self._set_status(f"대기 {ms}ms 삽입됨 (아직 디스크 미저장).")
