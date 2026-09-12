@@ -3,30 +3,41 @@
 마우스·키보드 입력을 **녹화 → 편집 → JSON 저장 → 재생**하는 한국어 UI 데스크톱 앱입니다.  
 클라우드/텔레메트리 없음. 녹화는 **녹화 모드**에서만 동작합니다.
 
-A small desktop macro recorder & editor: record mouse+keyboard, edit the event list after stop, save/load JSON into numbered slots, and play back once (no infinite loop by default).
+A small desktop macro recorder & editor: record mouse+keyboard, edit freely (cut/copy/paste), save/load unlimited slots, share as portable JSON code, and play back once (no infinite loop by default). Multi-monitor uses virtual-desktop absolute coordinates.
 
 ## 기능
 
-1. **번호 슬롯 (1번~10번)** — 왼쪽 패널에 고정 10개 슬롯  
-   - 표시: `1번 매크로 — 이름` 또는 `1번 매크로 (비어있음)`  
-   - 슬롯 선택 → 불러오기 (또는 더블클릭 / **Ctrl+1 … Ctrl+0**)  
-   - **[슬롯 저장]** → `macros/slot_01.json` … `slot_10.json`  
-   - 슬롯 비우기로 파일 삭제
-2. **녹화** — 시작/중지, 클릭(버튼·좌표), 스크롤, 키 입력, 지연 시간 기록  
-   - 마우스 **이동** 녹화는 기본 OFF (체크박스로 샘플링 ON)  
-   - 녹화 중 표시등(●)  
-   - 단축키: **F9** 녹화 토글, **F10** 재생(재생 중이면 중단)
-3. **편집** — 중지 후 이벤트 목록(**동작 1, 동작 2…** 1-based)  
-   - 필드 수정, 삭제, **범위 삭제 (A~B번)**, 위/아래 순서 변경, 대기(Wait) 삽입  
-   - **현재 마우스 위치로 X/Y 채우기** (click/move/scroll 좌표 보정)  
-   - **[슬롯 저장]**을 눌렀을 때만 디스크에 기록
-4. **재생** — 3초 카운트다운, **Esc** 또는 **F10**으로 중단, 기본 1회 재생  
-   - **N번부터 재생**: 시작 동작 번호 + 버튼 (이전 동작 건너뜀)
+1. **동적 슬롯 (개수 제한 없음)** — 왼쪽 스크롤 목록  
+   - **슬롯 추가** / **슬롯 삭제** / **슬롯 비우기** / **슬롯 복제** (`(복사)` 접미사)  
+   - 표시: `N번 매크로 — 이름` 또는 `(비어있음)`  
+   - 저장: `macros/slot_01.json`, `slot_02.json`, … (100번 이상은 `slot_100.json`)  
+   - **Ctrl+1 … Ctrl+0**: 목록 **앞쪽 1~10번째** 슬롯으로 빠른 이동 (있을 때만)
+2. **녹화** — 클릭(버튼·좌표), 스크롤, 키, 지연 / 마우스 이동은 기본 OFF  
+   - 단축키: **F9** 녹화 토글, **F10** 재생(재생 중이면 중단), **Esc** 중단  
+   - 좌표는 **가상 데스크톱 절대좌표** (멀티 모니터). 이벤트에 모니터 인덱스 참고 기록 가능
+3. **편집** — 동작 번호 1-based  
+   - 필드 수정, 삭제, **범위 삭제**, ▲▼ 순서, 대기(Wait) 삽입  
+   - **잘라내기 / 복사 / 붙여넣기** — 범위 지정 후 원하는 위치(선택 앞, 없으면 끝)에 붙이기  
+   - **현재 마우스 위치로 X/Y 채우기** (레이아웃 변경 시 재타겟)  
+   - **[슬롯 저장]**을 눌렀을 때만 디스크 기록
+4. **공유 (코드)**  
+   - **코드로 내보내기**: 펜스 JSON 스니펫 생성·복사  
+   - **코드 붙여넣기**: 동일 스니펫 → 새 슬롯 생성 또는 현재 슬롯 덮어쓰기  
+   - 왕복 시 이벤트 타입·지연·좌표·키 보존
+5. **재생** — 3초 카운트다운, 기본 1회, **N번부터 재생**
+
+## 멀티 모니터
+
+- `pynput` 녹화/재생은 OS **가상 데스크톱 전역(절대) 좌표**를 사용합니다.
+- UI 상단에 현재 마우스 `(x, y)`와 감지된 **모니터 번호**를 표시합니다 (`screeninfo`).
+- 모니터 배치가 같으면 화면 1·2 어디서든 동일 좌표로 재생됩니다.
+- 배치가 다르면 해당 동작을 선택한 뒤 **[현재 마우스 위치로 X/Y 채우기]**로 다시 맞추세요.
+- 이벤트의 `monitor` 필드는 참고용이며, 재생은 절대 `x`/`y`를 따릅니다.
 
 ## 요구 사항
 
 - Python **3.11+** (권장 3.11–3.13)
-- `pynput`, `customtkinter` (자세한 버전은 `requirements.txt`)
+- `pynput`, `customtkinter`, `screeninfo` (`requirements.txt`)
 
 ## 설치 & 실행
 
@@ -43,7 +54,7 @@ pip install -r requirements.txt
 python -m macro_studio
 ```
 
-또는 editable 설치 후:
+또는:
 
 ```bash
 pip install -e .
@@ -51,8 +62,6 @@ macro-studio
 ```
 
 ## 슬롯 저장 형식
-
-각 슬롯은 `macros/slot_NN.json` 파일입니다 (NN = 01…10).
 
 ```json
 {
@@ -67,7 +76,8 @@ macro-studio
       "x": 100,
       "y": 200,
       "button": "left",
-      "action": "press"
+      "action": "press",
+      "monitor": 0
     }
   ]
 }
@@ -75,29 +85,24 @@ macro-studio
 
 이벤트 `type`: `click` | `scroll` | `key` | `move` | `wait`
 
-### 슬롯 사용 흐름
+### 사용 흐름 예
 
-1. 왼쪽에서 **3번 매크로** 선택 → [슬롯 불러오기] (비어 있으면 빈 템플릿)
-2. F9로 녹화 → 목록에서 **동작 1, 2…** 편집
-3. 필요 시 범위 삭제(예: 1~2번 삭제 → 옛 3번이 동작 1이 됨)
-4. 좌표 보정: 이벤트 선택 → [현재 마우스 위치로 X/Y 채우기]
-5. [슬롯 저장] → `macros/slot_03.json`
-6. 재생: [▶ 재생] 전체, 또는 `5` + [N번부터 재생]
+1. **슬롯 추가** → 이름 입력 → F9 녹화 → 목록 편집  
+2. 동작 3~5번 **잘라내기** → 동작 1 선택 → **붙여넣기** (앞으로 이동)  
+3. **슬롯 복제**로 변형본 만들기  
+4. **코드로 내보내기** → 다른 PC에서 **코드 붙여넣기**  
+5. [슬롯 저장] → `macros/slot_NN.json`
 
 ## OS 권한 (중요)
 
 ### macOS
-- **시스템 설정 → 개인 정보 보호 및 보안**
-  - **손쉬운 사용(Accessibility)**: 터미널/Python/앱에 허용 (입력 제어·재생)
-  - **입력 모니터링(Input Monitoring)**: 키 녹화에 필요
-- 권한 없이 실행하면 클릭/키가 기록·재생되지 않을 수 있습니다.
+- **손쉬운 사용**, **입력 모니터링** 허용 필요
 
 ### Windows
-- 관리자 권한이 필요한 창(UAC 등) 위에서는 입력이 막힐 수 있습니다.
-- 백신/보안 소프트웨어가 입력 후킹을 차단하면 예외를 추가하세요.
+- UAC/보안 소프트웨어가 입력 후킹을 막을 수 있음
 
 ### Linux
-- X11에서는 대체로 바로 동작합니다. Wayland 환경에서는 `pynput` 제한이 있을 수 있어 X11 세션을 권장합니다.
+- X11 권장 (Wayland에서는 `pynput` 제한 가능)
 
 ## 프로젝트 구조
 
@@ -106,30 +111,28 @@ Macro/
 ├── README.md
 ├── requirements.txt
 ├── pyproject.toml
-├── .gitignore
 ├── macros/
-│   ├── .gitkeep
-│   └── slot_01.json   # 저장된 슬롯 예
 └── macro_studio/
-    ├── __init__.py
-    ├── __main__.py
-    ├── app.py          # UI (슬롯·편집·재생)
-    ├── recorder.py     # 녹화
-    ├── player.py       # 재생 (start_index 지원)
-    ├── models.py       # 데이터 모델 (+ slot)
-    └── storage.py      # JSON I/O + 슬롯 API
+    ├── app.py                 # UI 셸
+    ├── recorder.py / player.py
+    ├── models.py / storage.py # 동적 슬롯
+    ├── monitors.py            # 멀티모니터 절대좌표
+    ├── share.py               # 코드 내보내기/가져오기
+    ├── ui_slots.py / ui_share.py
+    ├── ui_events.py / ui_clipboard.py
+    └── __main__.py
 ```
 
-## 단축키 요약
+## 단축키
 
 | 키 | 동작 |
 |----|------|
 | F9 | 녹화 시작/중지 |
 | F10 | 재생 / 재생 중이면 중단 |
 | Esc | 재생 중단 |
-| Ctrl+1 … Ctrl+9, Ctrl+0 | 슬롯 1~10 불러오기 |
+| Ctrl+1 … Ctrl+0 | 목록 앞 1~10번째 슬롯 |
 
 ## 주의
 
-- 본 도구는 **본인 PC의 자동화**용입니다. 타인 시스템·게임 약관 위반·악성 자동화에 사용하지 마세요.
-- 재생 중 마우스가 움직이므로, 중단은 **Esc** / **F10**을 사용하세요.
+- 본인 PC 자동화 용도. 타인 시스템·약관 위반·악성 자동화에 사용하지 마세요.
+- 재생 중 마우스 이동 — **Esc** / **F10**으로 중단하세요.
