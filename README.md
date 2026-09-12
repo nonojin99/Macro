@@ -113,13 +113,13 @@ Macro/
 ├── pyproject.toml
 ├── macros/
 └── macro_studio/
-    ├── app.py                 # UI 셸
+    ├── app.py / app_hotkeys.py  # UI 셸
     ├── recorder.py / player.py
     ├── models.py / storage.py # 동적 슬롯
     ├── monitors.py            # 멀티모니터 절대좌표
     ├── share.py               # 코드 내보내기/가져오기
-    ├── ui_slots.py / ui_share.py
-    ├── ui_events.py / ui_clipboard.py
+    ├── ui_slots.py / ui_slots_ops.py / ui_share.py
+    ├── ui_events.py / ui_events_edit.py / ui_clipboard.py
     └── __main__.py
 ```
 
