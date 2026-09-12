@@ -8,6 +8,7 @@ from typing import Callable
 
 from pynput import keyboard, mouse
 
+from . import monitors
 from .models import EventType, MacroEvent
 
 # 앱 자체 핫키 — 녹화에서 제외
@@ -154,13 +155,15 @@ class MacroRecorder:
         if not self._recording:
             return
         delay = self._elapsed_ms()
+        xi, yi = int(x), int(y)
         ev = MacroEvent(
             type=EventType.CLICK.value,
             delay_ms=delay,
-            x=int(x),
-            y=int(y),
+            x=xi,
+            y=yi,
             button=_button_to_str(button),
             action="press" if pressed else "release",
+            monitor=monitors.annotate_monitor(xi, yi),
         )
         self._append(ev)
 
@@ -168,13 +171,15 @@ class MacroRecorder:
         if not self._recording:
             return
         delay = self._elapsed_ms()
+        xi, yi = int(x), int(y)
         ev = MacroEvent(
             type=EventType.SCROLL.value,
             delay_ms=delay,
-            x=int(x),
-            y=int(y),
+            x=xi,
+            y=yi,
             dx=int(dx),
             dy=int(dy),
+            monitor=monitors.annotate_monitor(xi, yi),
         )
         self._append(ev)
 
@@ -186,11 +191,13 @@ class MacroRecorder:
             return
         self._last_move_ts = now
         delay = self._elapsed_ms()
+        xi, yi = int(x), int(y)
         ev = MacroEvent(
             type=EventType.MOVE.value,
             delay_ms=delay,
-            x=int(x),
-            y=int(y),
+            x=xi,
+            y=yi,
+            monitor=monitors.annotate_monitor(xi, yi),
         )
         self._append(ev)
 
