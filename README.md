@@ -39,6 +39,57 @@ A small desktop macro recorder & editor: record mouse+keyboard, edit freely (cut
 - Python **3.11+** (권장 3.11–3.13)
 - `pynput`, `customtkinter`, `screeninfo` (`requirements.txt`)
 
+
+## Python 없이 쓰기 (Windows exe)
+
+Python을 설치하지 않아도 **GitHub Actions**가 만든 Windows 실행 파일로 매크로 스튜디오를 실행할 수 있습니다.
+
+### Actions 아티팩트 다운로드
+
+1. 저장소 **Actions** 탭 → 워크플로 **Build Windows exe** 선택
+2. 최신 성공한 실행(초록 체크)을 연 뒤 **Artifacts**에서 `MacroStudio-windows-x64` 다운로드
+3. zip을 풀어 `MacroStudio.exe` 실행  
+   - 첫 실행 시 exe와 **같은 폴더**에 `macros/` 가 자동 생성됩니다 (매크로 JSON 저장 위치)
+4. 태그 `v*` 를 푸시하면 Release에도 동일 zip이 첨부됩니다
+
+직접 링크(저장소가 public/권한 있을 때):  
+https://github.com/nonojin99/Macro/actions/workflows/build-windows.yml
+
+### 로컬에서 Windows 빌드
+
+Windows PC에서:
+
+```bat
+cd Macro
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements-build.txt
+scripts\build_windows.bat
+```
+
+또는 PowerShell:
+
+```powershell
+.\scripts\build_windows.ps1
+```
+
+결과: `dist\MacroStudio\MacroStudio.exe` (one-folder).  
+`dist/`·`build/` 는 git에 올리지 않습니다.
+
+**왜 one-folder?** customtkinter·pynput 리소스 로딩이 안정적이고, one-file보다 시작이 빠르며 Windows Defender 오탐이 상대적으로 적은 편입니다.
+
+### Windows Defender / SmartScreen 안내
+
+서명되지 않은 exe라 **Windows가 차단·경고**할 수 있습니다.  
+본인이 빌드했거나 Actions 아티팩트임을 확인한 뒤 “추가 정보 → 실행”으로 허용하세요.  
+백신 오탐이 나면 해당 폴더를 예외로 두거나 소스에서 직접 빌드하세요.
+
+### 멀티모니터·권한 노트 (exe 동일)
+
+- 좌표는 **가상 데스크톱 절대좌표**입니다. 모니터 배치가 바뀌면 **[현재 마우스 위치로 X/Y 채우기]**로 다시 맞추세요.
+- 일부 보안 소프트웨어·관리자 권한이 필요한 창에서는 입력 후킹/재생이 막힐 수 있습니다.
+- 관리자 권한으로 뜬 앱을 제어하려면 MacroStudio도 관리자 권한으로 실행해야 할 수 있습니다.
+
 ## 설치 & 실행
 
 ```bash
@@ -110,12 +161,18 @@ macro-studio
 Macro/
 ├── README.md
 ├── requirements.txt
+├── requirements-build.txt     # + pyinstaller
 ├── pyproject.toml
+├── macro_studio.spec          # Windows one-folder
+├── run_macro_studio.py        # PyInstaller 진입점
+├── scripts/build_windows.ps1 / .bat
+├── .github/workflows/build-windows.yml
+├── tests/test_frozen_paths.py
 ├── macros/
 └── macro_studio/
     ├── app.py / app_hotkeys.py  # UI 셸
     ├── recorder.py / player.py
-    ├── models.py / storage.py # 동적 슬롯
+    ├── models.py / storage.py # 동적 슬롯 (+ frozen exe 경로)
     ├── monitors.py            # 멀티모니터 절대좌표
     ├── share.py               # 코드 내보내기/가져오기
     ├── ui_slots.py / ui_slots_ops.py / ui_share.py
