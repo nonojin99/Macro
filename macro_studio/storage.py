@@ -1,16 +1,38 @@
-"""매크로 JSON 저장/불러오기 — 동적 슬롯(상한 없음) + 이름 기반 호환."""
+"""매크로 JSON 저장/불러오기 — 동적 슬롯(상한 없음) + 이름 기반 호환.
+
+PyInstaller(frozen) 실행 시 macros/ 는 exe 옆(쓰기 가능)에 둔다.
+_MEIPASS 는 읽기 전용 임시 폴더이므로 저장 경로로 쓰지 않는다.
+"""
 
 from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 
 from .models import MacroDocument
 
-_PACKAGE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = _PACKAGE_DIR.parent
-MACROS_DIR = PROJECT_ROOT / "macros"
+
+def is_frozen() -> bool:
+    """PyInstaller 등으로 묶인 실행 파일인지."""
+    return bool(getattr(sys, "frozen", False))
+
+
+def get_project_root() -> Path:
+    """개발: 패키지 상위(저장소 루트). frozen: 실행 파일(exe)이 있는 폴더."""
+    if is_frozen():
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent.parent
+
+
+def get_macros_dir() -> Path:
+    return get_project_root() / "macros"
+
+
+# 하위 호환: 모듈 import 시점 값 (frozen이면 exe 옆)
+PROJECT_ROOT = get_project_root()
+MACROS_DIR = get_macros_dir()
 
 # slot_1.json, slot_01.json, slot_100.json 모두 허용
 _SLOT_STEM = re.compile(r"^slot_(\d+)$")
@@ -20,8 +42,15 @@ MAX_SLOTS_SOFT = 500
 
 
 def ensure_macros_dir() -> Path:
-    MACROS_DIR.mkdir(parents=True, exist_ok=True)
-    return MACROS_DIR
+    """macros/ 생성(없으면). frozen이면 exe 옆에 생성."""
+    # import 이후 cwd/exe 위치가 바뀌는 경우는 드묾 — 항상 재계산해 안전하게
+    macros = get_macros_dir()
+    macros.mkdir(parents=True, exist_ok=True)
+    # 모듈 전역도 최신으로 맞춤 (UI 표시용)
+    global PROJECT_ROOT, MACROS_DIR
+    PROJECT_ROOT = get_project_root()
+    MACROS_DIR = macros
+    return macros
 
 
 def _validate_slot(slot: int) -> int:
@@ -45,9 +74,9 @@ def path_for_slot(slot: int) -> Path:
 
 def discover_slot_ids() -> list[int]:
     """macros/ 에서 slot_*.json 번호 목록 (정렬)."""
-    ensure_macros_dir()
+    macros = ensure_macros_dir()
     ids: set[int] = set()
-    for p in MACROS_DIR.glob("slot_*.json"):
+    for p in macros.glob("slot_*.json"):
         m = _SLOT_STEM.match(p.stem)
         if not m:
             continue
@@ -202,9 +231,9 @@ def path_for(name: str) -> Path:
 
 def list_macros() -> list[str]:
     """이름 기반 목록 — slot_XX.json 제외."""
-    ensure_macros_dir()
+    macros = ensure_macros_dir()
     names: list[str] = []
-    for p in sorted(MACROS_DIR.glob("*.json")):
+    for p in sorted(macros.glob("*.json")):
         if _SLOT_STEM.match(p.stem):
             continue
         names.append(p.stem)
