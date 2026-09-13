@@ -21,6 +21,13 @@ wheels/
 *.egg
 MANIFEST
 
+# PyInstaller
+*.manifest
+*.pyo
+warn-*.txt
+# Keep macro_studio.spec tracked; ignore accidental local one-file outputs
+MacroStudio-windows-x64.zip
+
 # Virtual environments
 .venv/
 venv/
