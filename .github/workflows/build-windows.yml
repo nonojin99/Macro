@@ -1,0 +1,60 @@
+name: Build Windows exe
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-build.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-build.txt
+
+      - name: Smoke-test frozen path helpers
+        run: python -m unittest tests.test_frozen_paths -v
+
+      - name: Build with PyInstaller
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build_windows.ps1
+
+      - name: Zip dist folder
+        shell: pwsh
+        run: |
+          $src = "dist/MacroStudio"
+          if (-not (Test-Path $src)) { throw "Missing $src" }
+          Compress-Archive -Path "$src/*" -DestinationPath "MacroStudio-windows-x64.zip" -Force
+          Get-Item MacroStudio-windows-x64.zip | Format-List Name, Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacroStudio-windows-x64
+          path: MacroStudio-windows-x64.zip
+          if-no-files-found: error
+
+      - name: Attach to release (tags v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MacroStudio-windows-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
