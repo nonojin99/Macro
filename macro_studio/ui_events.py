@@ -136,7 +136,7 @@ class EventsUIMixin:
 
     def _build_play_from_controls(self, parent: ctk.CTkFrame) -> None:
         play_from = ctk.CTkFrame(parent, fg_color="transparent")
-        play_from.grid(row=0, column=6, padx=4, pady=4, sticky="ew")
+        play_from.grid(row=0, column=3, padx=4, pady=4, sticky="ew")
         ctk.CTkLabel(play_from, text="부터").grid(row=0, column=2, padx=(2, 0))
         self.play_from_var = ctk.StringVar(value="1")
         self.play_from_entry = ctk.CTkEntry(play_from, textvariable=self.play_from_var, width=48)
@@ -210,3 +210,4 @@ class EventsUIMixin:
         if raw == "":
             return None
         return int(raw)
+
